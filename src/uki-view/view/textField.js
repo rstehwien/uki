@@ -201,3 +201,4 @@ uki.view.declare('uki.view.PasswordTextField', uki.view.TextField, function(Base
     };
 });
 
+uki.Collection.addAttrs(['placeholder']);
