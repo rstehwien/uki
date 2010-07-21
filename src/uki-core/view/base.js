@@ -3,7 +3,6 @@ include('../geometry.js');
 include('../utils.js');
 include('../builder.js');
 include('../dom.js');
-include('../dom/nativeLayout.js');
 include('observable.js');
 include('styleable.js');
 
@@ -274,6 +273,10 @@ uki.view.declare('uki.view.Base', uki.view.Observable, uki.view.Styleable, funct
         this._firstLayout = false;
     };
     
+    this.layoutIfNeeded = function() {
+        if (this._needsLayout && this.visible()) this.layout();
+    };
+    
     
     /**
      * @function uki.view.Base#minSize
@@ -316,6 +319,13 @@ uki.view.declare('uki.view.Base', uki.view.Observable, uki.view.Styleable, funct
         if (this._anchors & ANCHOR_TOP ^ ANCHOR_TOP) newRect.y += dY;
         if (this._anchors & ANCHOR_HEIGHT) newRect.height += dY;
         this.rect(newRect);
+    };
+    
+    /**
+     * Called when child changes it's size
+     */
+    this.childResized = function(child) {
+        // do nothing, extend in subviews
     };
     
     /**
@@ -442,6 +452,11 @@ uki.view.declare('uki.view.Base', uki.view.Observable, uki.view.Styleable, funct
      */
     this._createDom = function() {
         this._dom = uki.createElement('div', this.defaultCss);
+        this._initClassName();
+    };
+    
+    this._initClassName = function() {
+        this._dom.className = this.typeName().replace(/\./g, '-');
     };
     
     /**

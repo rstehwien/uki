@@ -1,5 +1,6 @@
 include('uki.js');
-
+(function() {
+    
 var toString = Object.prototype.toString,
     trim = String.prototype.trim,
     slice = Array.prototype.slice,
@@ -8,7 +9,10 @@ var toString = Object.prototype.toString,
     
 var marked = '__uki_marked';
 
- 
+// dummy subclass
+/** @ignore */
+function inheritance () {}
+
 /**
  * Utility functions.
  */
@@ -164,7 +168,7 @@ var utils = {
     	        array[i][marked] = true;
     	    };
     	    for (i = 0; i < result.length; i++) { 
-    	        delete result[i][marked] 
+    	        delete result[i][marked];
     	    };
     	    return result;
         	
@@ -299,22 +303,27 @@ var utils = {
                 this.init.apply(this, arguments);
             },
             
-			inheritance, i, startFrom = 0, tmp, baseClasses = [], base, name, copy, $arguments = arguments, length;
+			i, startFrom = 0, tmp, baseClasses = [], base, name, copy, $arguments = arguments, length;
 		
         if ((length = $arguments.length) > 1) {
-
-            if ($arguments[0].prototype) { // real inheritance
-                /** @ignore */
-                inheritance = function() {};
-                inheritance.prototype = arguments[0].prototype;
+            base = $arguments[0];
+            if (base.prototype) { // real inheritance
+                inheritance.prototype = base.prototype;
                 klass.prototype = new inheritance();
                 startFrom = 1;
                 baseClasses = [inheritance.prototype];
+                
+                // class method inheritance
+                for ( name in base ) {
+                    copy = base[ name ];
+                    if ( !base.hasOwnProperty(name) || copy === undefined || name == 'prototype' ) continue;
+                    klass[ name ] = copy;
+                }
             }
         }
 
         for (i=startFrom; i < length; i++) {
-            base = arguments[i];
+            base = $arguments[i];
             if (this.isFunction(base)) {
                 tmp = {};
                 base.apply(tmp, baseClasses);
@@ -322,13 +331,7 @@ var utils = {
             }
             baseClasses[ baseClasses.length ] = base;
             
-            for ( name in base ) {
-                copy = base[ name ];
-                if ( !base.hasOwnProperty(name) || copy === undefined ) continue;
-                klass.prototype[ name ] = copy;
-            }
-            
-            // uki.extend(klass.prototype, base);
+            uki.extend(klass.prototype, base);
         };
         if (!klass.prototype.init) klass.prototype.init = function() {};
         return klass;
@@ -412,7 +415,20 @@ var utils = {
             }
             return this;
         };
+    },
+    
+    camalize: function(string) {
+        return string.replace(/[-_]\S/g, function(v) {
+            return v.substr(1).toUpperCase();
+        });
+    },
+    
+    dasherize: function(string) {
+        return string.replace(/[A-Z]/g, function(v) {
+            return '-' + v.toLowerCase();
+        });
     }
 };
 utils.extend(uki, utils);
-delete utils;
+
+})();

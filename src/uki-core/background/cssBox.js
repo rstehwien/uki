@@ -36,16 +36,18 @@ uki.background.CssBox = uki.newClass(new function() {
 
         this._container = uki.createElement(
             'div', 
-            options + ';position:absolute;overflow:hidden;z-index:' + (ext.zIndex || '-1') + ';' + 
-            'left:' + inset.left + 'px;top:' + inset.top + 'px;right:' + inset.right + 'px;bottom:' + inset.bottom + 'px',
+            'position:absolute;overflow:hidden;z-index:' + (ext.zIndex || '-1') + ';' + 
+            'left:' + inset.left + 'px;top:' + inset.top + 'px;right:' + inset.right + 'px;bottom:' + inset.bottom + 'px;' +
+            uki.browser.css(options),
             ext.innerHTML
         );
+        this._container.className = 'uki-background-CssBox';
         this._attached = false;
     };
     
     this.attachTo = function(comp) {
         this._comp = comp;
-        this._comp.dom().appendChild(this._container);
+        this._comp.dom().insertBefore(this._container, this._comp.dom().firstChild);
 
         if (uki.supportNativeLayout) return;
         
